@@ -1,0 +1,58 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: gormigrate
+      POSTGRES_USER: gormigrate
+      POSTGRES_PASSWORD: gormigrate
+    healthcheck:
+      test: pg_isready --username="$${POSTGRES_USER}" --dbname="$${POSTGRES_DB}"
+      interval: 2s
+      timeout: 3s
+      retries: 10
+
+  mysql:
+    image: mysql:8
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_DATABASE: gormigrate
+      MYSQL_ROOT_PASSWORD: gormigrate
+      MYSQL_USER: gormigrate
+      MYSQL_PASSWORD: gormigrate
+    healthcheck:
+      test: mysqladmin ping --user="$${MYSQL_USER}" --password="$${MYSQL_PASSWORD}"
+      interval: 2s
+      timeout: 3s
+      retries: 10
+
+  mariadb:
+    image: mariadb:11
+    ports:
+      - 3307:3306
+    environment:
+      MARIADB_DATABASE: gormigrate
+      MARIADB_ROOT_PASSWORD: gormigrate
+      MARIADB_USER: gormigrate
+      MARIADB_PASSWORD: gormigrate
+    healthcheck:
+      test: healthcheck.sh --su-mysql --connect --innodb_initialized
+      interval: 2s
+      timeout: 3s
+      retries: 10
+
+  sqlserver:
+    # see https://hub.docker.com/r/microsoft/mssql-server
+    image: mcr.microsoft.com/mssql/server:2022-CU13-ubuntu-22.04
+    ports:
+      - 1433:1433
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: LoremIpsum86
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$${MSSQL_SA_PASSWORD}" -Q "SELECT 1" -b -o /dev/null
+      interval: 5s
+      timeout: 3s
+      retries: 20
